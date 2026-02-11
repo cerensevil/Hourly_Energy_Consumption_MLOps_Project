@@ -1,0 +1,8 @@
+projectenv/
+venv/
+__pycache__/
+.pytest_cache/
+mlruns/
+mlflow.db
+data/
+*.ipynb_checkpoints/
