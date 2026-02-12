@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Ana uygulama servisimiz
+  ml_ops_app:
+    build: .
+    container_name: energy_mlops_container
+    
+    # 1. Canlı Kod Paylaşımı (Volume): 
+    # Yereldeki kod değişikliklerinin konteynere anında yansımasını sağlar.
+    volumes:
+      - .:/app
+    
+    # 2. Port Yönlendirmeleri:
+    # Sol taraf senin bilgisayarındaki port, sağ taraf konteyner içindeki.
+    ports:
+      - "8000:8000" # FastAPI (İleride api klasörünü doldurduğunda)
+      - "5000:5000" # MLflow Dashboard erişimi için
+      - "4200:4200" # Prefect Dashboard erişimi için
+    
+    # 3. Çevre Değişkenleri:
+    # MLflow veritabanının yerini ve Prefect adresini sabitliyoruz.
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:///mlflow.db
+      - PREFECT_API_URL=http://localhost:4200/api
+    
+    # 4. İnteraktif Terminal:
+    # Arkadaşlarının terminalden komut çalıştırabilmesi için şart.
+    stdin_open: true
+    tty: true

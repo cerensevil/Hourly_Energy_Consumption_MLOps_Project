@@ -1,0 +1,19 @@
+# Sanal ortamları asla kopyalama
+projectenv/
+venv/
+.venv/
+
+# Python gereksizleri
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Git dosyaları
+.git/
+.github/
+
+# Yerel veritabanı ve büyük veriler
+mlflow.db
+data/processed/  # Eğer bunları Docker içinde tekrar üretecekseniz dışarıda bırakın
+data/raw/
+.env

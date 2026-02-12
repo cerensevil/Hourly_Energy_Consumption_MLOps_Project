@@ -64,9 +64,8 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     
     return str(output_path)
 
-# ---------------------------
 # Flow
-# ---------------------------
+
 
 @flow(name="Energy Data Multi-File Pipeline")
 def energy_pipeline(raw_data_dir: str = "data/raw_data"):
