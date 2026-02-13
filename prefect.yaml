@@ -1,0 +1,11 @@
+deployments:
+  - name: energy-data-prep
+    entrypoint: src/pipeline/data_preparation.py:energy_pipeline
+    work_pool:
+      name: default-agent-pool
+      work_queue_name: default
+    parameters:
+      raw_data_dir: data/raw_data
+    schedule:
+      cron: "0 2 * * *"
+      timezone: "Europe/Istanbul"
