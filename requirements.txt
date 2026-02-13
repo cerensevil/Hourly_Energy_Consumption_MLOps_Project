@@ -1,3 +1,4 @@
+nbformat==5.10.4
 aiosqlite==0.22.1
 alembic==1.18.4
 amplitude-analytics==1.2.1
