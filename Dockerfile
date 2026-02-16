@@ -1,5 +1,5 @@
 # 1. Senin yerelindeki sürümle birebir aynı Python imajı
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 # 2. Sistem bağımlılıklarını kuruyoruz (Prefect ve MLflow için gerekli araçlar)
 RUN apt-get update && apt-get install -y \
