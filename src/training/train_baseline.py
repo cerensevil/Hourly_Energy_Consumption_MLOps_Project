@@ -1,36 +1,30 @@
-# src/training/train_baseline.py
-
 import pandas as pd
-import mlflow
-import mlflow.pyfunc
-from prefect import task
-from src.models.baseline_model import Baseline24hModel
+from sklearn.metrics import mean_absolute_error
+from src.models.baseline_model import BaselineModel
 
 
-@task
 def train_baseline(data_path: str, target_col: str):
 
+    # 1️⃣ Load data
     df = pd.read_parquet(data_path)
 
-    model = Baseline24hModel(target_col)
-    model.fit(df)
+    # 2️⃣ Train / test split (son 24 saat test)
+    train_df = df.iloc[:-24]
+    test_df = df.iloc[-24:]
 
-    predictions = model.predict()
+    # 3️⃣ Model
+    model = BaselineModel(target_col=target_col)
 
-    # Basit MAE hesapla (son 24 vs bir önceki 24)
-    actual = df[target_col].tail(24).values
-    mae = abs(actual - predictions).mean()
+    # Baseline model fit gerektirmez ama mimari için çağırıyoruz
+    model.fit(train_df)
 
-    mlflow.set_experiment("energy-baseline")
+    # 4️⃣ Forecast
+    predictions = model.forecast_next_24(train_df)
 
-    with mlflow.start_run():
+    # 5️⃣ Evaluate
+    mae = mean_absolute_error(test_df[target_col], predictions)
 
-        mlflow.log_param("model_type", "baseline_24h")
-        mlflow.log_metric("mae", mae)
-
-        mlflow.pyfunc.log_model(
-            artifact_path="model",
-            python_model=model
-        )
-
-    print("Baseline training completed.")
+    return {
+        "model": model,
+        "mae": float(mae)
+    }

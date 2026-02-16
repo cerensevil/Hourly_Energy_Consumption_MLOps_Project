@@ -1,25 +1,15 @@
-# src/models/baseline_model.py
-
-import pandas as pd
-from src.models.base_model import BaseModel
-
-
-class Baseline24hModel(BaseModel):
+class BaselineModel:
 
     def __init__(self, target_col: str):
-        super().__init__(target_col)
-        self.last_24 = None
+        self.target_col = target_col
 
-    def fit(self, df: pd.DataFrame):
+    def fit(self, df):
+        # Baseline için training yok
+        return self
 
-        if len(df) < 24:
-            raise ValueError("Dataset must contain at least 24 rows.")
+    def forecast_next_24(self, df):
+        # Son 24 saati al
+        last_24 = df[self.target_col].tail(24).values
 
-        self.last_24 = df[self.target_col].tail(24).values
-
-    def predict(self):
-
-        if self.last_24 is None:
-            raise ValueError("Model not fitted yet.")
-
-        return self.last_24.tolist()
+        # Baseline: dünkü 24 saati aynen tekrar et
+        return last_24

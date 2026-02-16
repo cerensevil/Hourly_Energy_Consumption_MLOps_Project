@@ -1,36 +1,15 @@
 from prefect import flow
-import pandas as pd
-import mlflow
-
-from src.models.xgboost_model import XGBoostModel
-from src.pipeline.data.split import time_series_split
-from src.training.evaluate import evaluate_regression
+from src.training.train_xgboost import train_xgboost
 
 
-@flow(name="xgboost-training-flow")
-def xgboost_training_flow():
-
+@flow(name="xgboost-flow")
+def xgboost_flow():
     data_path = "data/processed/AEP_hourly_processed.parquet"
     target_col = "AEP"
 
-    df = pd.read_parquet(data_path)
+    result = train_xgboost(data_path, target_col)
+    print(result)
 
-    train, test = time_series_split(df, target_col)
 
-    model = XGBoostModel(target_col)
-    model.fit(train)
-
-    X_test = test.drop(columns=[target_col])
-    preds = model.predict(X_test)
-
-    metrics = evaluate_regression(
-        test[target_col].values,
-        preds
-    )
-
-    with mlflow.start_run(run_name="xgboost"):
-        mlflow.log_params({"model_type": "xgboost"})
-        for k, v in metrics.items():
-            mlflow.log_metric(k, v)
-
-    return metrics
+if __name__ == "__main__":
+    xgboost_flow()
