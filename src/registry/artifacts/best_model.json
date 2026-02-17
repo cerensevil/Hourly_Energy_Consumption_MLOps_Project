@@ -1,0 +1,5 @@
+{
+    "model_type": "xgboost",
+    "mae": 141.26041666666666,
+    "data_path": "data/processed/AEP_hourly_processed.parquet"
+}

@@ -1,23 +1,29 @@
-import mlflow
-from mlflow.tracking import MlflowClient
+from pathlib import Path
+import shutil
+import json
 
+ROOT = Path(__file__).resolve().parents[2]
 
-def promote_best_model(model_name: str):
+# evaluate flow sonrası oluşan artifacts (kaynak)
+SOURCE_MODEL = ROOT / "artifacts" / "best_model.pkl"
+SOURCE_META = ROOT / "artifacts" / "best_model.json"
 
-    client = MlflowClient()
+# registry hedef klasörü
+TARGET_DIR = ROOT / "src" / "registry" / "artifacts"
 
-    runs = mlflow.search_runs(
-        order_by=["metrics.rmse ASC"]
-    )
+def promote():
+    if not SOURCE_MODEL.exists():
+        raise FileNotFoundError(f"Source model yok: {SOURCE_MODEL}")
 
-    best_run_id = runs.iloc[0].run_id
+    if not SOURCE_META.exists():
+        raise FileNotFoundError(f"Source metadata yok: {SOURCE_META}")
 
-    model_uri = f"runs:/{best_run_id}/model"
+    TARGET_DIR.mkdir(parents=True, exist_ok=True)
 
-    client.create_registered_model(model_name)
+    shutil.copy2(SOURCE_MODEL, TARGET_DIR / "best_model.pkl")
+    shutil.copy2(SOURCE_META, TARGET_DIR / "best_model.json")
 
-    client.create_model_version(
-        name=model_name,
-        source=model_uri,
-        run_id=best_run_id
-    )
+    print("Model production registry'ye taşındı.")
+
+if __name__ == "__main__":
+    promote()

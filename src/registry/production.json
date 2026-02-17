@@ -1,0 +1,24 @@
+{
+  "model_type": "xgboost",
+  "loader": "local",
+  "model_path": "registry/artifacts/best_model.pkl",
+  "feature_names": [
+    "hour",
+    "dayofweek",
+    "month",
+    "year",
+    "is_weekend",
+    "sin_hour",
+    "cos_hour",
+    "target_lag_1",
+    "target_lag_24",
+    "target_roll_mean_24",
+    "target_roll_std_24"
+  ],
+  "mlflow": {
+    "tracking_uri": "http://mlflow:5000",
+    "experiment_name": "energy_forecasting",
+    "run_id": null,
+    "model_uri": null
+  }
+}
