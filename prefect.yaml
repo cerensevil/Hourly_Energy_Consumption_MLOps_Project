@@ -1,11 +1,29 @@
 deployments:
-  - name: energy-data-prep
-    entrypoint: src/pipeline/data_preparation.py:energy_pipeline
-    work_pool:
-      name: default-agent-pool
-      work_queue_name: default
-    parameters:
-      raw_data_dir: data/raw_data
-    schedule:
-      cron: "0 2 * * *"
-      timezone: "Europe/Istanbul"
+- name: energy-data-prep
+  entrypoint: src/pipeline/data_preparation.py:energy_pipeline
+  work_pool:
+    name: default-agent-pool
+    work_queue_name: default
+  parameters:
+    raw_data_dir: data/raw_data
+  schedule:
+    cron: 0 2 * * *
+    timezone: Europe/Istanbul
+- name: daily-evaluate-promote
+  version:
+  tags: []
+  description:
+  entrypoint: src/training/evaluate_and_promote_flow.py:evaluate_and_promote
+  parameters: {}
+  work_pool:
+    name: default-agent-pool
+    work_queue_name:
+    job_variables: {}
+  schedules:
+  - cron: 0 0 * * *
+    timezone:
+    day_or: true
+    active: true
+  pull:
+  - prefect.deployments.steps.set_working_directory:
+      directory: /app

@@ -1,7 +1,7 @@
-# 1. Senin yerelindeki sürümle birebir aynı Python imajı
+# 1️⃣ Python image
 FROM python:3.11-slim
 
-# 2. Sistem bağımlılıklarını kuruyoruz (Prefect ve MLflow için gerekli araçlar)
+# 2️⃣ Sistem bağımlılıkları
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -9,18 +9,19 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Çalışma dizini
+# 3️⃣ Çalışma dizini
 WORKDIR /app
 
-# 4. Bağımlılıkları kopyala ve kur
-# (requirements.txt dosyanın kök dizinde olduğunu varsayıyorum)
+# 4️⃣ Requirements
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Proje klasörlerini kopyala
+# 5️⃣ Proje dosyaları
 COPY . .
 
-# 6. Prefect ve MLflow için default portları açık bırakalım
-EXPOSE 4200 5000 8000
+# 6️⃣ Port
+EXPOSE 8000
 
-# Şimdilik bir komut vermiyoruz, Dev Containers veya Compose ile yöneteceğiz
+# 7️⃣ API başlat
+CMD ["uvicorn", "src.api.app:app", "--host", "0.0.0.0", "--port", "8000"]
