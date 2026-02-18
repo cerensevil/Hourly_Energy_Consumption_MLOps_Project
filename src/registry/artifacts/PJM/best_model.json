@@ -1,0 +1,6 @@
+{
+  "state": "PJM",
+  "model_type": "xgboost",
+  "mae": 25.466471354166668,
+  "data_file": "data/processed/PJM_Load_hourly_processed.parquet"
+}

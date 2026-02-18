@@ -8,11 +8,22 @@ def train_xgboost(data_path: str, target_col: str):
     # 1️⃣ Load data
     df = pd.read_parquet(data_path)
 
-    # Datetime'i feature'dan çıkar (XGBoost kabul etmez)
+    # -------------------------
+    # Feature temizliği
+    # -------------------------
+
+    # Datetime model feature olamaz
     if "Datetime" in df.columns:
         df = df.drop(columns=["Datetime"])
 
-    # 2️⃣ Train / test split (son 24 saat test)
+    # State metadata'dır, model feature değildir
+    if "state" in df.columns:
+        df = df.drop(columns=["state"])
+
+    # -------------------------
+    # 2️⃣ Train / Test split
+    # Son 24 saat test
+    # -------------------------
     train_df = df.iloc[:-24]
     test_df = df.iloc[-24:]
 
@@ -22,15 +33,20 @@ def train_xgboost(data_path: str, target_col: str):
     X_test = test_df.drop(columns=[target_col])
     y_test = test_df[target_col]
 
+    # -------------------------
     # 3️⃣ Model
+    # -------------------------
     model = XGBoostModel()
-
     model.train(X_train, y_train)
 
+    # -------------------------
     # 4️⃣ Predict
+    # -------------------------
     predictions = model.predict(X_test)
 
+    # -------------------------
     # 5️⃣ Evaluate
+    # -------------------------
     mae = mean_absolute_error(y_test, predictions)
 
     return {

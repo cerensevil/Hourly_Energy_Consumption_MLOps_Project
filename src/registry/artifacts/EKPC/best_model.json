@@ -1,0 +1,6 @@
+{
+  "state": "EKPC",
+  "model_type": "xgboost",
+  "mae": 0.9663798014322916,
+  "data_file": "data/processed/EKPC_hourly_processed.parquet"
+}

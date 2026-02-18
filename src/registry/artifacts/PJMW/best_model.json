@@ -1,0 +1,6 @@
+{
+  "state": "PJMW",
+  "model_type": "xgboost",
+  "mae": 4.4820556640625,
+  "data_file": "data/processed/PJMW_hourly_processed.parquet"
+}

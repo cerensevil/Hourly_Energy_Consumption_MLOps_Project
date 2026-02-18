@@ -1,0 +1,6 @@
+{
+  "state": "DUQ",
+  "model_type": "xgboost",
+  "mae": 1.045867919921875,
+  "data_file": "data/processed/DUQ_hourly_processed.parquet"
+}

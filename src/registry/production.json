@@ -20,5 +20,55 @@
     "experiment_name": "energy_forecasting",
     "run_id": "0e5239f57b9d46e3a8d55e00312707f0",
     "model_uri": "runs:/0e5239f57b9d46e3a8d55e00312707f0/model"
+  },
+  "state_models": {
+    "DAYTON": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/DAYTON/best_model.pkl"
+    },
+    "NI": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/NI/best_model.pkl"
+    },
+    "EKPC": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/EKPC/best_model.pkl"
+    },
+    "DOM": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/DOM/best_model.pkl"
+    },
+    "COMED": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/COMED/best_model.pkl"
+    },
+    "DEOK": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/DEOK/best_model.pkl"
+    },
+    "FE": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/FE/best_model.pkl"
+    },
+    "AEP": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/AEP/best_model.pkl"
+    },
+    "DUQ": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/DUQ/best_model.pkl"
+    },
+    "PJMW": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/PJMW/best_model.pkl"
+    },
+    "PJM": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/PJM/best_model.pkl"
+    },
+    "PJME": {
+      "model_type": "xgboost",
+      "model_path": "src/registry/artifacts/PJME/best_model.pkl"
+    }
   }
 }
