@@ -23,13 +23,18 @@ def evaluate_and_promote():
 
     print(f"\n🚀 Toplam {len(parquet_files)} state işlenecek.\n")
 
-    # production.json başlangıç
-    if production_file.exists():
-        prod_cfg = json.loads(production_file.read_text(encoding="utf-8"))
-    else:
-        prod_cfg = {}
-
-    state_models = {}
+    # ==========================================================
+    # Yeni production config oluştur (temiz başlangıç)
+    # ==========================================================
+    production_config = {
+        "mlflow": {
+            "tracking_uri": "http://mlflow:5000",
+            "experiment_name": "energy_forecasting",
+            "run_id": None,
+            "model_uri": None
+        },
+        "states": {}
+    }
 
     # ==========================================================
     # LOOP – HER STATE İÇİN MODEL EĞİT
@@ -50,12 +55,6 @@ def evaluate_and_promote():
         baseline_result = train_baseline(str(file), "target")
         xgb_result = train_xgboost(str(file), "target")
 
-        if "model" not in baseline_result or "mae" not in baseline_result:
-            raise ValueError("train_baseline must return {'model': ..., 'mae': ...}")
-
-        if "model" not in xgb_result or "mae" not in xgb_result:
-            raise ValueError("train_xgboost must return {'model': ..., 'mae': ...}")
-
         print("Baseline MAE:", baseline_result["mae"])
         print("XGBoost MAE:", xgb_result["mae"])
 
@@ -74,7 +73,7 @@ def evaluate_and_promote():
         print(f"🏆 Winner: {winner_name}")
 
         # -------------------------
-        # Save state-based artifacts
+        # Save Artifacts (state bazlı)
         # -------------------------
         state_dir = artifact_root / state
         state_dir.mkdir(parents=True, exist_ok=True)
@@ -98,34 +97,26 @@ def evaluate_and_promote():
 
         print(f"📦 Model saved to {state_dir}")
 
-        # production.json için map oluştur
-        state_models[state] = {
+        # -------------------------
+        # production.json → states
+        # -------------------------
+        production_config["states"][state] = {
             "model_type": winner_name,
-            "model_path": str(model_path)
+            "loader": "local",
+            "model_path": str(model_path),
+            "feature_names": [
+                "hour", "dayofweek", "month", "year", "is_weekend",
+                "sin_hour", "cos_hour",
+                "target_lag_1", "target_lag_24",
+                "target_roll_mean_24", "target_roll_std_24"
+            ]
         }
 
     # ==========================================================
-    # Update production.json (State-aware)
+    # production.json overwrite
     # ==========================================================
-    prod_cfg.update({
-        "loader": "local",
-        "feature_names": [
-            "hour", "dayofweek", "month", "year", "is_weekend",
-            "sin_hour", "cos_hour",
-            "target_lag_1", "target_lag_24",
-            "target_roll_mean_24", "target_roll_std_24"
-        ],
-        "state_models": state_models,
-        "mlflow": prod_cfg.get("mlflow", {
-            "tracking_uri": "http://localhost:5000",
-            "experiment_name": "energy_forecasting",
-            "run_id": None,
-            "model_uri": None
-        })
-    })
-
     production_file.write_text(
-        json.dumps(prod_cfg, indent=2),
+        json.dumps(production_config, indent=2),
         encoding="utf-8"
     )
 
@@ -133,7 +124,7 @@ def evaluate_and_promote():
     print("✅ Tüm state'ler için promotion tamamlandı")
 
     return {
-        "states_processed": list(state_models.keys())
+        "states_processed": list(production_config["states"].keys())
     }
 
 

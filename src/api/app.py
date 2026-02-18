@@ -1,72 +1,135 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
+from datetime import datetime
 
-from src.api.model_loader import load_model_from_registry, build_feature_vector
+from src.api.model_loader import load_model_from_registry
+from src.api.feature_builder import (
+    build_feature_vector,
+    build_features_from_datetime,
+)
 
-app = FastAPI(title="Energy Forecast API", version="0.1.0")
+app = FastAPI(title="Energy Forecast API", version="0.3.0")
 
-MODEL = None
-CFG = None
 
+# ==========================================================
+# REQUEST MODELLERİ
+# ==========================================================
 
 class PredictRequest(BaseModel):
+    state: str
     features: Dict[str, float]
     metadata: Optional[Dict[str, Any]] = None
 
 
-@app.on_event("startup")
-def startup():
-    global MODEL, CFG
-    MODEL, CFG = load_model_from_registry(force=True)
+class PredictFromDatetimeRequest(BaseModel):
+    state: str
+    datetime: datetime
 
+
+# ==========================================================
+# HEALTH
+# ==========================================================
 
 @app.get("/health")
 def health():
-    # registry değiştiyse otomatik reload
-    global MODEL, CFG
     try:
-        MODEL, CFG = load_model_from_registry(force=False)
+        return {"status": "ok"}
     except Exception:
-        pass
-    return {"status": "ok", "model_loaded": MODEL is not None}
+        return {"status": "error"}
 
 
-@app.get("/model-info")
-def model_info():
-    global MODEL, CFG
-    MODEL, CFG = load_model_from_registry(force=False)
+# ==========================================================
+# MODEL INFO (STATE-BASED)
+# ==========================================================
 
-    if CFG is None:
-        raise HTTPException(status_code=500, detail="Config yüklenmedi.")
+@app.get("/model-info/{state}")
+def model_info(state: str):
+    try:
+        model, cfg = load_model_from_registry(state=state, force=False)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     return {
-        "model_type": CFG.get("model_type"),
-        "loader": CFG.get("loader"),
-        "model_path": CFG.get("model_path"),
-        "feature_names": CFG.get("feature_names"),
-        "mlflow": CFG.get("mlflow"),
+        "state": state,
+        "loader": cfg.get("loader"),
+        "feature_names": cfg.get("feature_names"),
+        "available_states": list(cfg.get("state_models", {}).keys()),
     }
 
 
+# ==========================================================
+# MANUAL FEATURE PREDICT
+# ==========================================================
+
 @app.post("/predict")
 def predict(req: PredictRequest):
-    global MODEL, CFG
-    MODEL, CFG = load_model_from_registry(force=False)
 
-    if MODEL is None or CFG is None:
+    try:
+        model, cfg = load_model_from_registry(state=req.state, force=False)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if model is None or cfg is None:
         raise HTTPException(status_code=500, detail="Model yüklenmedi.")
 
-    feature_names = CFG.get("feature_names", [])
+    feature_names = cfg.get("feature_names", [])
+
     missing = [f for f in feature_names if f not in req.features]
     if missing:
-        raise HTTPException(status_code=400, detail=f"Eksik feature'lar: {missing}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Eksik feature'lar: {missing}"
+        )
 
     x = build_feature_vector(req.features, feature_names)
 
     try:
-        y = MODEL.predict(x)
+        y = model.predict(x)
         pred = float(y[0])
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Predict hatası: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Predict hatası: {str(e)}"
+        )
 
-    return {"prediction": pred}
+    return {
+        "state": req.state,
+        "prediction": pred
+    }
+
+
+# ==========================================================
+# DATETIME-BASED SMART PREDICT
+# ==========================================================
+
+@app.post("/predict-from-datetime")
+def predict_from_datetime(req: PredictFromDatetimeRequest):
+
+    try:
+        model, cfg = load_model_from_registry(state=req.state, force=False)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    try:
+        features = build_features_from_datetime(req.state, req.datetime)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    feature_names = cfg.get("feature_names", [])
+    x = build_feature_vector(features, feature_names)
+
+    try:
+        y = model.predict(x)
+        pred = float(y[0])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Predict hatası: {str(e)}"
+        )
+
+    return {
+        "state": req.state,
+        "datetime": req.datetime,
+        "prediction": pred
+    }
