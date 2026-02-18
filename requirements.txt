@@ -14,3 +14,5 @@ griffe==0.38.1
 pydantic==2.6.4
 pydantic-core==2.16.3
 joblib
+streamlit
+requests
