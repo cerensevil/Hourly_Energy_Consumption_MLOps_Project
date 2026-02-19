@@ -11,17 +11,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/DAYTON/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "NI": {
@@ -29,17 +22,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/NI/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "EKPC": {
@@ -47,17 +33,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/EKPC/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "DOM": {
@@ -65,17 +44,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/DOM/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "COMED": {
@@ -83,17 +55,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/COMED/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "DEOK": {
@@ -101,17 +66,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/DEOK/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "FE": {
@@ -119,17 +77,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/FE/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "AEP": {
@@ -137,17 +88,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/AEP/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "DUQ": {
@@ -155,17 +99,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/DUQ/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "PJMW": {
@@ -173,17 +110,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/PJMW/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "PJM": {
@@ -191,17 +121,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/PJM/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     },
     "PJME": {
@@ -209,17 +132,10 @@
       "loader": "local",
       "model_path": "src/registry/artifacts/PJME/best_model.pkl",
       "feature_names": [
-        "hour",
-        "dayofweek",
-        "month",
-        "year",
-        "is_weekend",
-        "sin_hour",
-        "cos_hour",
-        "target_lag_1",
-        "target_lag_24",
-        "target_roll_mean_24",
-        "target_roll_std_24"
+        "hour","dayofweek","month","year","is_weekend",
+        "sin_hour","cos_hour",
+        "target_lag_1","target_lag_24",
+        "target_roll_mean_24","target_roll_std_24"
       ]
     }
   }
