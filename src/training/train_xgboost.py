@@ -20,6 +20,10 @@ def train_xgboost(data_path: str, target_col: str):
     if "state" in df.columns:
         df = df.drop(columns=["state"])
 
+    # Kritik: raw ölçüm kolonu feature olmasın (gelecekte yok)
+    if "AEP_MW" in df.columns:
+        df = df.drop(columns=["AEP_MW"])    
+
     # -------------------------
     # 2️⃣ Train / Test split
     # Son 24 saat test

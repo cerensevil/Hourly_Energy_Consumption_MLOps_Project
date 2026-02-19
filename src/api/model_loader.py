@@ -80,11 +80,19 @@ def load_model_from_registry(
 
     else:
         raise ValueError(f"Bilinmeyen loader: {loader}")
+    
+    # --- EKLE (model ile feature_names uyum kontrolü) ---
+    fns = state_cfg.get("feature_names") or []
+    n_expected = getattr(model, "n_features_in_", None)  # sklearn için
+    if n_expected is not None and fns and len(fns) != int(n_expected):
+        raise ValueError(
+            f"Feature mismatch: registry feature_names={len(fns)} ama model n_features_in_={n_expected}. "
+            f"production.json -> {state} -> feature_names düzelt."
+        )
 
     _cached_models[state] = model
     return model, state_cfg
-
-
+    
 def build_feature_vector(
     features: Dict[str, float],
     feature_names: List[str]

@@ -51,6 +51,10 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     lf = lf.with_columns([
         pl.col(target_col).alias("target")
     ])
+    
+    # Orijinal target kolonunu drop et (AEP_MW vb. feature'a karışmasın)
+    if target_col != "target":
+        lf = lf.drop([target_col])
 
     # State kolonunu ekle
     lf = lf.with_columns([
