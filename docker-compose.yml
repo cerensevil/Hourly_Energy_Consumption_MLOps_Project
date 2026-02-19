@@ -92,13 +92,14 @@ services:
       - .:/app
     ports:
       - "8501:8501"
+    environment:
+      API_URL: http://ml_ops_app:8000
     command: >
       streamlit run ui/app.py
       --server.port=8501
       --server.address=0.0.0.0
     depends_on:
       - ml_ops_app
-
 
 volumes:
   prefect-db:

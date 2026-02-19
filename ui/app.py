@@ -6,7 +6,8 @@ from datetime import datetime, date, time
 # =========================
 # Config
 # =========================
-API_URL = os.getenv("API_URL", "http://ml_ops_app:8002").rstrip("/")
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000").rstrip("/")
+st.write("API_URL_DEBUG:", API_URL)
 
 st.set_page_config(page_title="Energy Forecast", layout="centered")
 st.title("⚡ Energy Consumption Forecast")

@@ -2,58 +2,39 @@ import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from src.models.xgboost_model import XGBoostModel
 
+FEATURE_COLS = [
+    "hour","dayofweek","month","year","is_weekend",
+    "sin_hour","cos_hour",
+    "target_lag_1","target_lag_24",
+    "target_roll_mean_24","target_roll_std_24"
+]
 
-def train_xgboost(data_path: str, target_col: str):
+def train_xgboost(data_path: str, target_col: str = "target"):
 
-    # 1️⃣ Load data
     df = pd.read_parquet(data_path)
 
-    # -------------------------
-    # Feature temizliği
-    # -------------------------
+    # sadece gerekli kolonlar (target + featurelar) ile çalış
+    keep = [target_col] + FEATURE_COLS
+    missing = [c for c in keep if c not in df.columns]
+    if missing:
+        raise ValueError(f"Eksik kolonlar: {missing}")
 
-    # Datetime model feature olamaz
-    if "Datetime" in df.columns:
-        df = df.drop(columns=["Datetime"])
+    df = df[keep].copy()
 
-    # State metadata'dır, model feature değildir
-    if "state" in df.columns:
-        df = df.drop(columns=["state"])
-
-    # Kritik: raw ölçüm kolonu feature olmasın (gelecekte yok)
-    if "AEP_MW" in df.columns:
-        df = df.drop(columns=["AEP_MW"])    
-
-    # -------------------------
-    # 2️⃣ Train / Test split
-    # Son 24 saat test
-    # -------------------------
+    # Train/Test split (son 24 saat test)
     train_df = df.iloc[:-24]
     test_df = df.iloc[-24:]
 
-    X_train = train_df.drop(columns=[target_col])
+    X_train = train_df[FEATURE_COLS]
     y_train = train_df[target_col]
 
-    X_test = test_df.drop(columns=[target_col])
+    X_test = test_df[FEATURE_COLS]
     y_test = test_df[target_col]
 
-    # -------------------------
-    # 3️⃣ Model
-    # -------------------------
     model = XGBoostModel()
     model.train(X_train, y_train)
 
-    # -------------------------
-    # 4️⃣ Predict
-    # -------------------------
     predictions = model.predict(X_test)
-
-    # -------------------------
-    # 5️⃣ Evaluate
-    # -------------------------
     mae = mean_absolute_error(y_test, predictions)
 
-    return {
-        "model": model,
-        "mae": float(mae)
-    }
+    return {"model": model, "mae": float(mae), "feature_names": FEATURE_COLS}
