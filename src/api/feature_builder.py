@@ -57,9 +57,9 @@ def _ensure_datetime(dt: Union[str, datetime]) -> datetime:
 def build_features_from_datetime(state: str, dt: Union[str, datetime]) -> Dict[str, float]:
 
     dt = _ensure_datetime(dt)
+    state = state.strip().upper()
     df = _get_state_df(state)
 
-    # Polars datetime objesi üret
     dt_pl = pl.datetime(
         dt.year, dt.month, dt.day,
         dt.hour, dt.minute, dt.second
@@ -72,14 +72,20 @@ def build_features_from_datetime(state: str, dt: Union[str, datetime]) -> Dict[s
             f"{state} için bu datetime bulunamadı: {dt}"
         )
 
+    feature_dict = {}
+
+    # 🔥 MODELİN BEKLEDİĞİ ORİJİNAL TARGET ADI EKLENİYOR
+    target_col_name = f"{state}_MW"
+    target_value = row.select("target").item()
+    feature_dict[target_col_name] = float(target_value)
+
+    # Diğer feature'lar
     feature_cols = [
         "hour", "dayofweek", "month", "year", "is_weekend",
         "sin_hour", "cos_hour",
         "target_lag_1", "target_lag_24",
         "target_roll_mean_24", "target_roll_std_24"
     ]
-
-    feature_dict = {}
 
     for col in feature_cols:
         value = row.select(col).item()
@@ -89,7 +95,7 @@ def build_features_from_datetime(state: str, dt: Union[str, datetime]) -> Dict[s
 
 
 # ---------------------------------------------------
-# 5️⃣ Cache Info (opsiyonel debug için)
+# 5️⃣ Cache Info
 # ---------------------------------------------------
 def cache_info() -> Dict[str, List[str]]:
     return {
