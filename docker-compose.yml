@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: prefect_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: prefect
+      POSTGRES_PASSWORD: prefect
+      POSTGRES_DB: prefect
+    volumes:
+      - prefect-db:/var/lib/postgresql/data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow_server
+    restart: always
+    ports:
+      - "5000:5000"
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:///mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+      --allowed-hosts '*'
+    volumes:
+      - ./mlruns:/mlflow/artifacts
+      - ./mlflow.db:/mlflow.db
+
+  prefect:
+    image: prefecthq/prefect:2.16.7-python3.12
+    container_name: prefect_server
+    restart: always
+    command: >
+      prefect server start
+      --host 0.0.0.0
+      --port 4200
+    environment:
+      PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
+    ports:
+      - "4200:4200"
+    depends_on:
+      - postgres
+
+  ml_ops_app:
+    build: .
+    container_name: energy_mlops_container
+    restart: always
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PREFECT_API_URL=http://prefect:4200/api
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - mlflow
+      - prefect
+
+  streamlit_ui:
+    build: .
+    container_name: energy_streamlit_ui
+    restart: always
+    volumes:
+      - .:/app
+    working_dir: /app
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+    command: streamlit run ui/app.py --server.port=8501 --server.address=0.0.0.0
+    depends_on:
+      - ml_ops_app
+
+volumes:
+  prefect-db:

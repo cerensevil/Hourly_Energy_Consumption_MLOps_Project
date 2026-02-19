@@ -1,0 +1,28 @@
+{
+    "name": "Energy MLOps Dev Environment",
+    "dockerComposeFile": "../docker-compose.yml",
+    "service": "ml_ops_app",
+    "workspaceFolder": "/app",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",         // Python desteği
+                "ms-toolsai.jupyter",        // Notebookları konteyner içinde açmak için
+                "charliermarsh.ruff",        // Hızlı kod düzenleme (Linting)
+                "ms-azuretools.vscode-docker", // Docker yönetimi
+                "njpwerner.autodocstring"    // Otomatik dokümantasyon
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.testing.pytestEnabled": true
+            }
+        }
+    },
+
+    // Konteyner her açıldığında requirements.txt kontrolü yapması için
+    "postCreateCommand": "pip install -r requirements.txt",
+
+    // Konteyner içindeki terminalin root olarak kalması (izin sorunlarını önler)
+    "remoteUser": "root"
+}

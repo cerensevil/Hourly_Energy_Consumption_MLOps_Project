@@ -1,0 +1,6 @@
+{
+  "state": "DOM",
+  "model_type": "xgboost",
+  "mae": 12.090494791666666,
+  "data_file": "data/processed/DOM_hourly_processed.parquet"
+}
