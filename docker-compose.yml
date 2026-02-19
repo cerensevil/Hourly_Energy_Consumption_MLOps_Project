@@ -1,5 +1,6 @@
-services:
+version: '3.8'
 
+services:
   postgres:
     image: postgres:15
     container_name: prefect_postgres
@@ -10,7 +11,6 @@ services:
       POSTGRES_DB: prefect
     volumes:
       - prefect-db:/var/lib/postgresql/data
-
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
@@ -29,7 +29,6 @@ services:
       - ./mlruns:/mlflow/artifacts
       - ./mlflow.db:/mlflow.db
 
-
   prefect:
     image: prefecthq/prefect:2.16.7-python3.12
     container_name: prefect_server
@@ -45,60 +44,38 @@ services:
     depends_on:
       - postgres
 
-
-  prefect-worker:
-    build: .
-    container_name: prefect_worker
-    restart: always
-    environment:
-      PREFECT_API_URL: http://prefect:4200/api
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-    command: >
-      bash -c "
-      sleep 10 &&
-      prefect worker start --pool default-agent-pool --type process
-      "
-    volumes:
-      - .:/app
-    depends_on:
-      - prefect
-      - mlflow
-
-
   ml_ops_app:
     build: .
     container_name: energy_mlops_container
     restart: always
     volumes:
       - .:/app
+    working_dir: /app
     ports:
       - "8000:8000"
     environment:
-      MLFLOW_TRACKING_URI: http://mlflow:5000
-      PREFECT_API_URL: http://prefect:4200/api
+      - PYTHONPATH=/app
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PREFECT_API_URL=http://prefect:4200/api
+    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000
     depends_on:
       - mlflow
       - prefect
-    stdin_open: true
-    tty: true
 
-
-  # ✅ YENİ STREAMLIT SERVİSİ
   streamlit_ui:
     build: .
     container_name: energy_streamlit_ui
     restart: always
     volumes:
       - .:/app
+    working_dir: /app
     ports:
       - "8501:8501"
-    command: >
-      streamlit run ui/app.py
-      --server.port=8501
-      --server.address=0.0.0.0
+    environment:
+      - PYTHONPATH=/app
+    command: streamlit run ui/app.py --server.port=8501 --server.address=0.0.0.0
     depends_on:
       - ml_ops_app
-
 
 volumes:
   prefect-db:
