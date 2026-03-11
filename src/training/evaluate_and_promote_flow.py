@@ -1,6 +1,7 @@
 from prefect import flow
 from src.training.train_baseline import train_baseline
 from src.training.train_xgboost import train_xgboost
+from src.config.dataset_config import DATASET_VERSION
 
 import json
 import joblib
@@ -87,7 +88,8 @@ def evaluate_and_promote():
             "state": state,
             "model_type": winner_name,
             "mae": float(winner_mae),
-            "data_file": str(file)
+            "data_file": str(file),
+            "dataset_version": DATASET_VERSION
         }
 
         metadata_path.write_text(
@@ -104,6 +106,7 @@ def evaluate_and_promote():
             "model_type": winner_name,
             "loader": "local",
             "model_path": str(model_path),
+            "dataset_version": DATASET_VERSION,
             "feature_names": [
                 "hour", "dayofweek", "month", "year", "is_weekend",
                 "sin_hour", "cos_hour",

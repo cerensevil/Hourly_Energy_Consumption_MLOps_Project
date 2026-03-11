@@ -2,5 +2,6 @@
   "state": "DEOK",
   "model_type": "xgboost",
   "mae": 4.158650716145833,
-  "data_file": "data/processed/DEOK_hourly_processed.parquet"
+  "data_file": "data/processed/DEOK_hourly_processed.parquet",
+  "dataset_version": "energy_features_v1"
 }

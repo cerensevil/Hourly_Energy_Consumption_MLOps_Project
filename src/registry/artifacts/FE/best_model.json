@@ -2,5 +2,6 @@
   "state": "FE",
   "model_type": "xgboost",
   "mae": 9.376729329427084,
-  "data_file": "data/processed/FE_hourly_processed.parquet"
+  "data_file": "data/processed/FE_hourly_processed.parquet",
+  "dataset_version": "energy_features_v1"
 }

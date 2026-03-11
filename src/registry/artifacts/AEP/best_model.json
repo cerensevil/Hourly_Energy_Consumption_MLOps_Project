@@ -2,5 +2,6 @@
   "state": "AEP",
   "model_type": "xgboost",
   "mae": 12.562093098958334,
-  "data_file": "data/processed/AEP_hourly_processed.parquet"
+  "data_file": "data/processed/AEP_hourly_processed.parquet",
+  "dataset_version": "energy_features_v1"
 }

@@ -2,5 +2,6 @@
   "state": "NI",
   "model_type": "xgboost",
   "mae": 5.757731119791667,
-  "data_file": "data/processed/NI_hourly_processed.parquet"
+  "data_file": "data/processed/NI_hourly_processed.parquet",
+  "dataset_version": "energy_features_v1"
 }

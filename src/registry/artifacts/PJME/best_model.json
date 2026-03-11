@@ -2,5 +2,6 @@
   "state": "PJME",
   "model_type": "xgboost",
   "mae": 72.02791341145833,
-  "data_file": "data/processed/PJME_hourly_processed.parquet"
+  "data_file": "data/processed/PJME_hourly_processed.parquet",
+  "dataset_version": "energy_features_v1"
 }
