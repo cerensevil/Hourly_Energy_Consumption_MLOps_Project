@@ -1,7 +1,10 @@
 {
   "state": "NI",
   "model_type": "xgboost",
-  "mae": 5.757731119791667,
+  "mae": 159.45454915364584,
+  "rmse": 193.69444900630202,
+  "cwe": 201.76924641927084,
   "data_file": "data/processed/NI_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T11:01:51.156831"
 }

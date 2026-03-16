@@ -1,7 +1,10 @@
 {
   "state": "DUQ",
   "model_type": "xgboost",
-  "mae": 1.045867919921875,
+  "mae": 15.456273396809896,
+  "rmse": 19.088862659754152,
+  "cwe": 33.19110616048177,
   "data_file": "data/processed/DUQ_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T11:04:56.045995"
 }

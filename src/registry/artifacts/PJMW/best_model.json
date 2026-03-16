@@ -1,7 +1,10 @@
 {
   "state": "PJMW",
   "model_type": "xgboost",
-  "mae": 4.4820556640625,
+  "mae": 77.76826985677083,
+  "rmse": 91.48634804928031,
+  "cwe": 194.97688802083334,
   "data_file": "data/processed/PJMW_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:56:36.297249"
 }

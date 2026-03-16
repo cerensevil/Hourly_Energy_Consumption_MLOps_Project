@@ -1,6 +1,22 @@
 import pandas as pd
-from sklearn.metrics import mean_absolute_error
+
 from src.models.xgboost_model import XGBoostModel
+from src.training.evaluate import evaluate_regression
+
+
+FEATURE_COLUMNS = [
+    "hour",
+    "dayofweek",
+    "month",
+    "year",
+    "is_weekend",
+    "sin_hour",
+    "cos_hour",
+    "target_lag_1",
+    "target_lag_24",
+    "target_roll_mean_24",
+    "target_roll_std_24"
+]
 
 
 def train_xgboost(data_path: str, target_col: str):
@@ -9,47 +25,62 @@ def train_xgboost(data_path: str, target_col: str):
     df = pd.read_parquet(data_path)
 
     # -------------------------
-    # Feature temizliği
+    # Remove metadata columns
     # -------------------------
 
-    # Datetime model feature olamaz
     if "Datetime" in df.columns:
         df = df.drop(columns=["Datetime"])
 
-    # State metadata'dır, model feature değildir
     if "state" in df.columns:
         df = df.drop(columns=["state"])
 
     # -------------------------
-    # 2️⃣ Train / Test split
-    # Son 24 saat test
+    # 🔹 TRAIN WINDOW
+    # Only historical data
     # -------------------------
-    train_df = df.iloc[:-24]
-    test_df = df.iloc[-24:]
 
-    X_train = train_df.drop(columns=[target_col])
-    y_train = train_df[target_col]
-
-    X_test = test_df.drop(columns=[target_col])
-    y_test = test_df[target_col]
+    train_df = df[df["year"] < 2018]
 
     # -------------------------
-    # 3️⃣ Model
+    # Feature selection
     # -------------------------
+
+    X = train_df[FEATURE_COLUMNS]
+    y = train_df[target_col]
+
+    # -------------------------
+    # Train / Validation split
+    # last 24h validation
+    # -------------------------
+
+    X_train = X.iloc[:-24]
+    X_test = X.iloc[-24:]
+
+    y_train = y.iloc[:-24]
+    y_test = y.iloc[-24:]
+
+    # -------------------------
+    # Model
+    # -------------------------
+
     model = XGBoostModel()
     model.train(X_train, y_train)
 
     # -------------------------
-    # 4️⃣ Predict
+    # Predict
     # -------------------------
+
     predictions = model.predict(X_test)
 
     # -------------------------
-    # 5️⃣ Evaluate
+    # Evaluate
     # -------------------------
-    mae = mean_absolute_error(y_test, predictions)
+
+    metrics = evaluate_regression(y_test, predictions)
 
     return {
         "model": model,
-        "mae": float(mae)
+        "mae": metrics["mae"],
+        "rmse": metrics["rmse"],
+        "cwe": metrics["cwe"]
     }

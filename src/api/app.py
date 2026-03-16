@@ -2,17 +2,33 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 from datetime import datetime
+import time
+
+from prometheus_client import start_http_server
 
 from src.api.model_loader import (
     load_model_from_registry,
     load_registry
 )
+
 from src.api.feature_builder import (
     build_feature_vector,
     build_features_from_datetime,
 )
 
-app = FastAPI(title="Energy Forecast API", version="0.5.1")
+from src.monitoring.metrics import (
+    prediction_count,
+    prediction_latency
+)
+
+app = FastAPI(title="Energy Forecast API", version="0.6.0")
+
+
+# ---------------------------------------------------------
+# Start Prometheus metrics server
+# ---------------------------------------------------------
+
+start_http_server(8001)
 
 
 class PredictRequest(BaseModel):
@@ -32,10 +48,13 @@ def health():
 
 
 def _available_states(full_cfg: Dict[str, Any]):
+
     # production.json: states veya state_models destekle
     block = full_cfg.get("states") or full_cfg.get("state_models") or {}
+
     if not isinstance(block, dict):
         return []
+
     return list(block.keys())
 
 
@@ -59,8 +78,14 @@ def model_info(state: str):
     }
 
 
+# ---------------------------------------------------------
+# Prediction endpoint
+# ---------------------------------------------------------
+
 @app.post("/predict")
 def predict(req: PredictRequest):
+
+    start = time.time()
 
     state = req.state.strip().upper()
 
@@ -70,7 +95,9 @@ def predict(req: PredictRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     feature_names = state_cfg.get("feature_names", [])
+
     missing = [f for f in feature_names if f not in req.features]
+
     if missing:
         raise HTTPException(status_code=400, detail=f"Eksik feature'lar: {missing}")
 
@@ -82,11 +109,27 @@ def predict(req: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Predict hatası: {str(e)}")
 
-    return {"state": state, "prediction": pred}
+    # -----------------------------------------------------
+    # Prometheus metrics
+    # -----------------------------------------------------
 
+    prediction_count.inc()
+    prediction_latency.observe(time.time() - start)
+
+    return {
+        "state": state,
+        "prediction": pred
+    }
+
+
+# ---------------------------------------------------------
+# Datetime based prediction endpoint
+# ---------------------------------------------------------
 
 @app.post("/predict-from-datetime")
 def predict_from_datetime(req: PredictFromDatetimeRequest):
+
+    start = time.time()
 
     state = req.state.strip().upper()
 
@@ -101,6 +144,7 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
         raise HTTPException(status_code=400, detail=str(e))
 
     feature_names = state_cfg.get("feature_names", [])
+
     x = build_feature_vector(features, feature_names)
 
     try:
@@ -109,4 +153,15 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Predict hatası: {str(e)}")
 
-    return {"state": state, "datetime": req.datetime.isoformat(), "prediction": pred}
+    # -----------------------------------------------------
+    # Prometheus metrics
+    # -----------------------------------------------------
+
+    prediction_count.inc()
+    prediction_latency.observe(time.time() - start)
+
+    return {
+        "state": state,
+        "datetime": req.datetime.isoformat(),
+        "prediction": pred
+    }

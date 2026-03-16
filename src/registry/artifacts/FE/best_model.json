@@ -1,7 +1,10 @@
 {
   "state": "FE",
   "model_type": "xgboost",
-  "mae": 9.376729329427084,
+  "mae": 60.245849609375,
+  "rmse": 71.37042325108378,
+  "cwe": 104.86726888020833,
   "data_file": "data/processed/FE_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:49:39.755718"
 }

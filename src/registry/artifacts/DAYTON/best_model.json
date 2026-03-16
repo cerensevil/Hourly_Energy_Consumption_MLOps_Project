@@ -1,7 +1,10 @@
 {
   "state": "DAYTON",
   "model_type": "xgboost",
-  "mae": 1.562957763671875,
+  "mae": 21.12396240234375,
+  "rmse": 27.67622488451927,
+  "cwe": 42.74493408203125,
   "data_file": "data/processed/DAYTON_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:54:07.058267"
 }

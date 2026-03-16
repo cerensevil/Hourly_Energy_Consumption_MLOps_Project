@@ -1,7 +1,10 @@
 {
   "state": "AEP",
   "model_type": "xgboost",
-  "mae": 12.562093098958334,
+  "mae": 157.13916015625,
+  "rmse": 208.6773585867369,
+  "cwe": 415.9508463541667,
   "data_file": "data/processed/AEP_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T11:00:24.390067"
 }

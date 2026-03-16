@@ -1,7 +1,10 @@
 {
   "state": "PJME",
   "model_type": "xgboost",
-  "mae": 72.02791341145833,
+  "mae": 354.0022786458333,
+  "rmse": 431.90335799437827,
+  "cwe": 869.1360677083334,
   "data_file": "data/processed/PJME_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:57:36.317068"
 }

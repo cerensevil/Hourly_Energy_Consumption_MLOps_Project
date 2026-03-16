@@ -1,12 +1,14 @@
 from prefect import flow
-from src.training.train_baseline import train_baseline
-from src.training.train_xgboost import train_xgboost
+
 from src.config.dataset_config import DATASET_VERSION
+from src.training.model_runner import run_models
+from src.training.model_selection import select_best_model
 
 import json
 import joblib
 from pathlib import Path
 import polars as pl
+from datetime import datetime
 
 
 @flow(name="evaluate-and-promote-multi-state")
@@ -15,6 +17,9 @@ def evaluate_and_promote():
     processed_dir = Path("data/processed")
     artifact_root = Path("src/registry/artifacts")
     production_file = Path("src/registry/production.json")
+    leaderboard_dir = Path("src/registry/leaderboards")
+
+    leaderboard_dir.mkdir(parents=True, exist_ok=True)
 
     parquet_files = list(processed_dir.glob("*_processed.parquet"))
 
@@ -25,8 +30,9 @@ def evaluate_and_promote():
     print(f"\n🚀 Toplam {len(parquet_files)} state işlenecek.\n")
 
     # ==========================================================
-    # Yeni production config oluştur (temiz başlangıç)
+    # Yeni production config
     # ==========================================================
+
     production_config = {
         "mlflow": {
             "tracking_uri": "http://mlflow:5000",
@@ -38,8 +44,9 @@ def evaluate_and_promote():
     }
 
     # ==========================================================
-    # LOOP – HER STATE İÇİN MODEL EĞİT
+    # LOOP – HER STATE
     # ==========================================================
+
     for file in parquet_files:
 
         print("=" * 60)
@@ -50,32 +57,37 @@ def evaluate_and_promote():
 
         print(f"State: {state}")
 
-        # -------------------------
+        # ------------------------------------------------------
         # Train Models
-        # -------------------------
-        baseline_result = train_baseline(str(file), "target")
-        xgb_result = train_xgboost(str(file), "target")
+        # ------------------------------------------------------
 
-        print("Baseline MAE:", baseline_result["mae"])
-        print("XGBoost MAE:", xgb_result["mae"])
+        results = run_models(str(file), "target")
 
-        # -------------------------
-        # Compare
-        # -------------------------
-        if xgb_result["mae"] < baseline_result["mae"]:
-            winner_name = "xgboost"
-            winner_model = xgb_result["model"]
-            winner_mae = xgb_result["mae"]
-        else:
-            winner_name = "baseline"
-            winner_model = baseline_result["model"]
-            winner_mae = baseline_result["mae"]
+        print("\n📊 Model Metrics")
 
-        print(f"🏆 Winner: {winner_name}")
+        for name, res in results.items():
 
-        # -------------------------
-        # Save Artifacts (state bazlı)
-        # -------------------------
+            print(
+                f"{name} | "
+                f"MAE={res['mae']:.2f} "
+                f"RMSE={res['rmse']:.2f} "
+                f"CWE={res['cwe']:.2f}"
+            )
+
+        # ------------------------------------------------------
+        # Select Winner
+        # ------------------------------------------------------
+
+        winner_name, winner_result = select_best_model(results)
+
+        winner_model = winner_result["model"]
+
+        print(f"\n🏆 Winner: {winner_name}")
+
+        # ------------------------------------------------------
+        # Save Artifacts
+        # ------------------------------------------------------
+
         state_dir = artifact_root / state
         state_dir.mkdir(parents=True, exist_ok=True)
 
@@ -87,9 +99,12 @@ def evaluate_and_promote():
         metadata = {
             "state": state,
             "model_type": winner_name,
-            "mae": float(winner_mae),
+            "mae": float(winner_result["mae"]),
+            "rmse": float(winner_result["rmse"]),
+            "cwe": float(winner_result["cwe"]),
             "data_file": str(file),
-            "dataset_version": DATASET_VERSION
+            "dataset_version": DATASET_VERSION,
+            "timestamp": datetime.utcnow().isoformat()
         }
 
         metadata_path.write_text(
@@ -99,9 +114,39 @@ def evaluate_and_promote():
 
         print(f"📦 Model saved to {state_dir}")
 
-        # -------------------------
-        # production.json → states
-        # -------------------------
+        # ------------------------------------------------------
+        # Save Leaderboard
+        # ------------------------------------------------------
+
+        leaderboard_path = leaderboard_dir / f"{state}.json"
+
+        leaderboard_data = {
+            "state": state,
+            "dataset_version": DATASET_VERSION,
+            "timestamp": datetime.utcnow().isoformat(),
+            "models": []
+        }
+
+        for name, res in results.items():
+
+            leaderboard_data["models"].append({
+                "model": name,
+                "mae": float(res["mae"]),
+                "rmse": float(res["rmse"]),
+                "cwe": float(res["cwe"])
+            })
+
+        leaderboard_path.write_text(
+            json.dumps(leaderboard_data, indent=2),
+            encoding="utf-8"
+        )
+
+        print(f"📊 Leaderboard saved: {leaderboard_path}")
+
+        # ------------------------------------------------------
+        # Update production config
+        # ------------------------------------------------------
+
         production_config["states"][state] = {
             "model_type": winner_name,
             "loader": "local",
@@ -116,8 +161,9 @@ def evaluate_and_promote():
         }
 
     # ==========================================================
-    # production.json overwrite
+    # Write production.json
     # ==========================================================
+
     production_file.write_text(
         json.dumps(production_config, indent=2),
         encoding="utf-8"

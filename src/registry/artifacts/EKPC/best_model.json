@@ -1,7 +1,10 @@
 {
   "state": "EKPC",
   "model_type": "xgboost",
-  "mae": 0.9663798014322916,
+  "mae": 48.519022623697914,
+  "rmse": 69.21479684733504,
+  "cwe": 119.9371337890625,
   "data_file": "data/processed/EKPC_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:51:06.380166"
 }

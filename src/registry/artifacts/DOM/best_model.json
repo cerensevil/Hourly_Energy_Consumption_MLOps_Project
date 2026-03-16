@@ -1,7 +1,10 @@
 {
   "state": "DOM",
   "model_type": "xgboost",
-  "mae": 12.090494791666666,
+  "mae": 222.71712239583334,
+  "rmse": 252.35841660400942,
+  "cwe": 621.201171875,
   "data_file": "data/processed/DOM_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T10:55:31.990453"
 }

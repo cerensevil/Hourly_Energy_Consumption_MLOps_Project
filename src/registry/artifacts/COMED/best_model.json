@@ -1,7 +1,10 @@
 {
   "state": "COMED",
   "model_type": "xgboost",
-  "mae": 30.0703125,
+  "mae": 89.42606608072917,
+  "rmse": 106.78585409763036,
+  "cwe": 182.41060384114584,
   "data_file": "data/processed/COMED_hourly_processed.parquet",
-  "dataset_version": "energy_features_v1"
+  "dataset_version": "energy_features_v1",
+  "timestamp": "2026-03-13T11:03:27.449796"
 }
