@@ -18,10 +18,12 @@ from src.api.feature_builder import (
 
 from src.monitoring.metrics import (
     prediction_count,
-    prediction_latency
+    prediction_latency,
+    prediction_errors,
+    prediction_values
 )
 
-app = FastAPI(title="Energy Forecast API", version="0.6.0")
+app = FastAPI(title="Energy Forecast API", version="0.6.1")
 
 
 # ---------------------------------------------------------
@@ -49,7 +51,6 @@ def health():
 
 def _available_states(full_cfg: Dict[str, Any]):
 
-    # production.json: states veya state_models destekle
     block = full_cfg.get("states") or full_cfg.get("state_models") or {}
 
     if not isinstance(block, dict):
@@ -92,6 +93,7 @@ def predict(req: PredictRequest):
     try:
         model, state_cfg = load_model_from_registry(state=state, force=False)
     except Exception as e:
+        prediction_errors.inc()
         raise HTTPException(status_code=400, detail=str(e))
 
     feature_names = state_cfg.get("feature_names", [])
@@ -99,6 +101,7 @@ def predict(req: PredictRequest):
     missing = [f for f in feature_names if f not in req.features]
 
     if missing:
+        prediction_errors.inc()
         raise HTTPException(status_code=400, detail=f"Eksik feature'lar: {missing}")
 
     x = build_feature_vector(req.features, feature_names)
@@ -107,14 +110,16 @@ def predict(req: PredictRequest):
         y = model.predict(x)
         pred = float(y[0])
     except Exception as e:
+        prediction_errors.inc()
         raise HTTPException(status_code=500, detail=f"Predict hatası: {str(e)}")
 
     # -----------------------------------------------------
     # Prometheus metrics
     # -----------------------------------------------------
 
-    prediction_count.inc()
+    prediction_count.labels(state=state).inc()
     prediction_latency.observe(time.time() - start)
+    prediction_values.observe(pred)
 
     return {
         "state": state,
@@ -136,11 +141,13 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
     try:
         model, state_cfg = load_model_from_registry(state=state, force=False)
     except Exception as e:
+        prediction_errors.inc()
         raise HTTPException(status_code=400, detail=str(e))
 
     try:
         features = build_features_from_datetime(state, req.datetime)
     except Exception as e:
+        prediction_errors.inc()
         raise HTTPException(status_code=400, detail=str(e))
 
     feature_names = state_cfg.get("feature_names", [])
@@ -151,14 +158,16 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
         y = model.predict(x)
         pred = float(y[0])
     except Exception as e:
+        prediction_errors.inc()
         raise HTTPException(status_code=500, detail=f"Predict hatası: {str(e)}")
 
     # -----------------------------------------------------
     # Prometheus metrics
     # -----------------------------------------------------
 
-    prediction_count.inc()
+    prediction_count.labels(state=state).inc()
     prediction_latency.observe(time.time() - start)
+    prediction_values.observe(pred)
 
     return {
         "state": state,
