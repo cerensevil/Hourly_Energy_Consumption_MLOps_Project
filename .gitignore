@@ -88,3 +88,5 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+# Prometheus data
+prometheus_data/
