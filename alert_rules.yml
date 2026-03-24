@@ -1,0 +1,126 @@
+groups:
+  - name: ml_model_alerts
+    interval: 30s
+    rules:
+
+      # 🔴 MODEL WORSE THAN BASELINE
+      - alert: ModelWorseThanBaseline
+        expr: |
+          (
+            sqrt(
+              sum(rate(prediction_squared_error_sum[5m])) 
+              / 
+              sum(rate(prediction_squared_error_count[5m]))
+            )
+          )
+          /
+          (
+            sqrt(
+              sum(rate(baseline_squared_error_sum[5m])) 
+              / 
+              sum(rate(baseline_squared_error_count[5m]))
+            )
+          ) > 1.1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Model worse than baseline"
+          description: |
+            Model RMSE is worse than baseline by more than 10%.
+            Possible model drift or data shift.
+            Action: Check data, retrain model.
+
+      # 🟠 HIGH LATENCY
+      - alert: HighLatencyP95
+        expr: |
+          histogram_quantile(0.95, sum(rate(prediction_latency_seconds_bucket[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency detected"
+          description: |
+            P95 latency > 500ms.
+            Possible performance bottleneck.
+
+      # 🔴 VERY HIGH LATENCY
+      - alert: CriticalLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(prediction_latency_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Critical latency"
+          description: |
+            P95 latency > 1s.
+            System under heavy load or model too slow.
+
+      # 🔴 HIGH ERROR RATE
+      - alert: HighErrorRate
+        expr: |
+          rate(prediction_errors_total[5m])
+          /
+          rate(prediction_count_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High prediction error rate"
+          description: |
+            More than 5% of predictions are failing.
+            Check API and input validation.
+
+      # 🟠 HIGH COST WEIGHTED ERROR
+      - alert: HighBusinessRisk
+        expr: |
+          (
+            sum(rate(cost_weighted_error_sum[5m])) 
+            / 
+            sum(rate(cost_weighted_error_count[5m]))
+          )
+          >
+          1.5 * avg_over_time(
+            (
+              sum(rate(cost_weighted_error_sum[5m])) 
+              / 
+              sum(rate(cost_weighted_error_count[5m]))
+            )[1h:]
+          )
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Business risk increasing"
+          description: |
+            Cost Weighted Error significantly increased.
+            Financial impact rising.
+
+      # 🔴 UNDERPREDICTION RISK (VERY IMPORTANT FOR ENERGY)
+      - alert: HighUnderpredictionRate
+        expr: |
+          sum(rate(underprediction_total[5m]))
+          /
+          sum(rate(prediction_count_total[5m])) > 0.3
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High underprediction risk"
+          description: |
+            Model is underpredicting more than 30%.
+            Risk of energy shortage.
+
+      # 🟠 LOW TRAFFIC (SYSTEM ISSUE)
+      - alert: LowPredictionRate
+        expr: |
+          rate(prediction_count_total[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low prediction traffic"
+          description: |
+            Very low request rate.
+            Possible ingestion or API issue.

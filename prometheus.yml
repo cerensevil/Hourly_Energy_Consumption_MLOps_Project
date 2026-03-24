@@ -1,8 +1,24 @@
 global:
   scrape_interval: 5s
+  evaluation_interval: 5s
+
+rule_files:
+  - "alert_rules.yml"
 
 scrape_configs:
-  - job_name: "mlops_api"
-
+  # 🚀 FastAPI (ML inference service)
+  - job_name: "fastapi"
+    metrics_path: /metrics
     static_configs:
-      - targets: ["ml_ops_app:8001"]d
+      - targets: ["127.0.0.1:8000"]
+
+  # 🧠 Prometheus kendisini izlesin (debug için çok faydalı)
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - "alertmanager:9093"
