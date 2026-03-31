@@ -6,5 +6,5 @@
   "cwe": 182.41060384114584,
   "data_file": "data/processed/COMED_hourly_processed.parquet",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-13T11:03:27.449796"
+  "timestamp": "2026-03-30T17:44:02.885696"
 }

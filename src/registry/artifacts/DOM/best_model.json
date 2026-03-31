@@ -6,5 +6,5 @@
   "cwe": 621.201171875,
   "data_file": "data/processed/DOM_hourly_processed.parquet",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-13T10:55:31.990453"
+  "timestamp": "2026-03-30T18:38:36.269525"
 }

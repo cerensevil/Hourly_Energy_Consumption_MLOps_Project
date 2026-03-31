@@ -6,5 +6,5 @@
   "cwe": 92.310302734375,
   "data_file": "data/processed/DEOK_hourly_processed.parquet",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-13T10:52:37.861445"
+  "timestamp": "2026-03-30T18:32:39.062787"
 }

@@ -1,0 +1,18 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'albayhalim@gmail.com'
+  smtp_auth_username: 'albayhalim@gmail.com'
+  smtp_auth_password: 'anzd twcs uuox yeql'
+  smtp_require_tls: true
+
+route:
+  receiver: 'email-alert'
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 1h
+
+receivers:
+  - name: 'email-alert'
+    email_configs:
+      - to: 'YOUR_EMAIL@gmail.com'
+        send_resolved: true

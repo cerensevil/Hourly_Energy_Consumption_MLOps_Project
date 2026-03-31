@@ -6,5 +6,5 @@
   "cwe": 415.9508463541667,
   "data_file": "data/processed/AEP_hourly_processed.parquet",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-13T11:00:24.390067"
+  "timestamp": "2026-03-30T17:37:38.016590"
 }

@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 from prefect import task, flow
 
+# NEW IMPORTS
+from src.validation.ge_validator import validate_dataframe
+import pandas as pd
+
 
 # =====================================================
 # TASK
@@ -12,22 +16,15 @@ from prefect import task, flow
 
 @task(retries=3, retry_delay_seconds=5)
 def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
-    """
-    CSV'yi okur,
-    - target kolonunu standartlaştırır
-    - state kolonunu dosya isminden üretir
-    - feature engineering yapar
-    - parquet + metadata json olarak kaydeder
-    """
 
-    file_name = csv_path.stem                 # örn: AEP_hourly
+    file_name = csv_path.stem
     state_name = file_name.split("_")[0].upper()
 
     output_path = output_dir / f"{file_name}_processed.parquet"
     metadata_path = output_path.with_suffix(".json")
 
     # -------------------------
-    # 1) Target column tespiti
+    # Target column detection
     # -------------------------
     schema = pl.scan_csv(csv_path).schema
     all_cols = list(schema.keys())
@@ -38,7 +35,7 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     print(f"     Orijinal Target: {target_col}")
 
     # -------------------------
-    # 2) Lazy pipeline
+    # Lazy pipeline
     # -------------------------
     lf = pl.scan_csv(csv_path)
 
@@ -47,23 +44,23 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
         pl.col(target_col).cast(pl.Float64, strict=False),
     ])
 
-    # Target standartlaştır
+    # Target standardize
     lf = lf.with_columns([
         pl.col(target_col).alias("target")
     ])
 
-    # State kolonunu ekle
+    # State column
     lf = lf.with_columns([
         pl.lit(state_name).alias("state")
     ])
 
-    # Temizlik
+    # Cleaning
     lf = lf.drop_nulls(subset=["Datetime"])
     lf = lf.sort("Datetime")
     lf = lf.unique(subset=["Datetime"], keep="first")
 
     # -------------------------
-    # 3) Zaman Feature'ları
+    # Time features
     # -------------------------
     lf = lf.with_columns([
         pl.col("Datetime").dt.hour().alias("hour"),
@@ -76,7 +73,7 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     ])
 
     # -------------------------
-    # 4) Cyclical Encoding
+    # Cyclical encoding
     # -------------------------
     lf = lf.with_columns([
         (pl.col("hour") * (2 * np.pi / 24)).sin().alias("sin_hour"),
@@ -84,7 +81,7 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     ])
 
     # -------------------------
-    # 5) Lag & Rolling
+    # Lag & rolling
     # -------------------------
     lf = lf.with_columns([
         pl.col("target").shift(1).alias("target_lag_1"),
@@ -94,7 +91,7 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
     ])
 
     # -------------------------
-    # 6) Null temizliği
+    # Final dataframe
     # -------------------------
     df_final = lf.drop_nulls().collect()
 
@@ -102,13 +99,19 @@ def process_file_to_parquet(csv_path: Path, output_dir: Path) -> str:
         print(f"UYARI: {file_name} için veri boş. Kaydedilmedi.")
         return ""
 
+    # =========================
+    # VALIDATION (Great Expectations)
+    # =========================
+    df_pd = df_final.to_pandas()
+    validate_dataframe(df_pd, state_name)
+
     # -------------------------
-    # 7) Parquet kaydet
+    # Save parquet
     # -------------------------
     df_final.write_parquet(output_path)
 
     # -------------------------
-    # 8) Metadata kaydet
+    # Save metadata
     # -------------------------
     metadata = {
         "state": state_name,
@@ -141,7 +144,7 @@ def energy_pipeline(raw_data_dir: str = "data/raw_data"):
 
     processed_path.mkdir(parents=True, exist_ok=True)
 
-    # Eski processed dosyaları temizle
+    # Clean old files
     for f in processed_path.glob("*_processed.parquet"):
         f.unlink()
 

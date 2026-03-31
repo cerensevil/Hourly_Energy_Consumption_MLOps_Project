@@ -6,7 +6,7 @@ from prometheus_client import Counter, Histogram, Gauge
 prediction_count = Counter(
     "prediction_count_total",
     "Total number of predictions",
-    ["state"]
+    ["state", "model_type", "model_version"]
 )
 
 # ================================
@@ -15,7 +15,7 @@ prediction_count = Counter(
 prediction_latency = Histogram(
     "prediction_latency_seconds",
     "Prediction latency in seconds",
-    ["state"],
+    ["state", "model_type", "model_version"],
     buckets=[0.01, 0.05, 0.1, 0.2, 0.5, 1, 2]
 )
 
@@ -33,7 +33,7 @@ prediction_errors = Counter(
 prediction_value = Histogram(
     "prediction_value",
     "Distribution of prediction outputs",
-    ["state"],
+    ["state", "model_type", "model_version"],
     buckets=[50000, 100000, 200000, 400000, 800000, 1200000]
 )
 
@@ -43,7 +43,7 @@ prediction_value = Histogram(
 absolute_error = Histogram(
     "prediction_absolute_error",
     "Absolute error |y_true - y_pred|",
-    ["state"],
+    ["state", "model_type", "model_version"],
     buckets=[1000, 5000, 10000, 20000, 50000, 100000]
 )
 
@@ -53,18 +53,17 @@ absolute_error = Histogram(
 squared_error = Histogram(
     "prediction_squared_error",
     "Squared error",
-    ["state"],
+    ["state", "model_type", "model_version"],
     buckets=[1e6, 1e7, 5e7, 1e8, 5e8, 1e9]
 )
 
 # ================================
-# 🔥 NEW: Baseline squared error
+# Baseline squared error
 # ================================
 baseline_squared_error = Histogram(
     "baseline_squared_error",
     "Squared error of baseline model (t-24)",
-    ["state"],
-    buckets=[1e6, 1e7, 5e7, 1e8, 5e8, 1e9]
+    ["state"]
 )
 
 # ================================
@@ -73,13 +72,13 @@ baseline_squared_error = Histogram(
 underprediction_count = Counter(
     "underprediction_total",
     "Number of underpredictions",
-    ["state"]
+    ["state", "model_type", "model_version"]
 )
 
 overprediction_count = Counter(
     "overprediction_total",
     "Number of overpredictions",
-    ["state"]
+    ["state", "model_type", "model_version"]
 )
 
 # ================================
@@ -88,17 +87,17 @@ overprediction_count = Counter(
 cost_weighted_error_metric = Histogram(
     "cost_weighted_error",
     "Cost weighted error",
-    ["state"],
+    ["state", "model_type", "model_version"],
     buckets=[1000, 10000, 50000, 100000, 500000, 1000000]
 )
 
 # ================================
-# Active model tracking
+# Active model tracking (CRITICAL)
 # ================================
 active_model = Gauge(
     "active_model_info",
     "Active model per state",
-    ["state", "model_type"]
+    ["state", "model_type", "model_version"]
 )
 
 # ================================

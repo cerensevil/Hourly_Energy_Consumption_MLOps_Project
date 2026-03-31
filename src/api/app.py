@@ -21,14 +21,15 @@ from src.monitoring.metrics import (
     prediction_value,
     absolute_error,
     squared_error,
-    baseline_squared_error,  # 🔥 NEW
+    baseline_squared_error,
     underprediction_count,
     overprediction_count,
-    cost_weighted_error_metric
+    cost_weighted_error_metric,
+    active_model,
 )
 
 from src.metrics.cost_weighted_error import cost_weighted_error
-
+from src.training.evaluate_and_promote_flow import evaluate_and_promote
 
 # ================================
 # Logging
@@ -39,12 +40,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 # ================================
 # App Init
 # ================================
-app = FastAPI(title="Energy Forecast API", version="1.0.0")
+app = FastAPI(title="Energy Forecast API", version="2.0.0")
 
+# ================================
+# STATE (NEW)
+# ================================
+LAST_RETRAIN_TIME = None
+LAST_SIGNAL_TIME = None
 
 # ================================
 # Schemas
@@ -86,50 +91,84 @@ def metrics():
 
 
 # ================================
-# CORE METRIC LOGIC (REUSABLE)
+# CORE METRIC LOGIC
 # ================================
-def log_metrics(state: str, pred: float, latency: float, actual: Optional[float], features: Dict[str, float]):
+def log_metrics(
+    state: str,
+    pred: float,
+    latency: float,
+    actual: Optional[float],
+    features: Dict[str, float],
+    model_name: str,
+    model_version: str
+):
 
-    # ================================
-    # BASIC METRICS
-    # ================================
-    prediction_count.labels(state=state).inc()
-    prediction_latency.labels(state=state).observe(latency)
-    prediction_value.labels(state=state).observe(pred)
+    active_model.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).set(1)
 
-    # ================================
-    # ERROR + BUSINESS METRICS
-    # ================================
+    prediction_count.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).inc()
+
+    prediction_latency.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).observe(latency)
+
+    prediction_value.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).observe(pred)
+
     if actual is None:
         return
 
     error = actual - pred
     abs_err = abs(error)
 
-    absolute_error.labels(state=state).observe(abs_err)
-    squared_error.labels(state=state).observe(error ** 2)
+    absolute_error.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).observe(abs_err)
 
-    # ================================
-    # BASELINE ERROR (🔥 CRITICAL)
-    # ================================
+    squared_error.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).observe(error ** 2)
+
     if "target_lag_24" in features:
         y_baseline = features["target_lag_24"]
         baseline_err = (actual - y_baseline) ** 2
         baseline_squared_error.labels(state=state).observe(baseline_err)
 
-    # ================================
-    # UNDER / OVER
-    # ================================
     if error > 0:
-        underprediction_count.labels(state=state).inc()
+        underprediction_count.labels(
+            state=state,
+            model_type=model_name,
+            model_version=model_version
+        ).inc()
     else:
-        overprediction_count.labels(state=state).inc()
+        overprediction_count.labels(
+            state=state,
+            model_type=model_name,
+            model_version=model_version
+        ).inc()
 
-    # ================================
-    # BUSINESS METRIC (CWE)
-    # ================================
     cwe = cost_weighted_error([actual], [pred])
-    cost_weighted_error_metric.labels(state=state).observe(cwe)
+    cost_weighted_error_metric.labels(
+        state=state,
+        model_type=model_name,
+        model_version=model_version
+    ).observe(cwe)
 
 
 # ================================
@@ -147,6 +186,9 @@ def predict(req: PredictRequest):
         prediction_errors.inc()
         raise HTTPException(status_code=400, detail=str(e))
 
+    model_name = state_cfg.get("model_type", "unknown")
+    model_version = state_cfg.get("version", "v0")
+
     feature_names = state_cfg.get("feature_names", [])
     missing = [f for f in feature_names if f not in req.features]
 
@@ -159,7 +201,7 @@ def predict(req: PredictRequest):
         y = model.predict(x)
         pred = float(y[0])
 
-        logger.info(f"[PRED DEBUG] state={state} prediction={pred}")
+        logger.info(f"[PRED] state={state} pred={pred}")
 
     except Exception as e:
         prediction_errors.inc()
@@ -167,11 +209,20 @@ def predict(req: PredictRequest):
 
     latency = time.time() - start
 
-    # 🔥 LOG EVERYTHING
-    log_metrics(state, pred, latency, req.actual, req.features)
+    log_metrics(
+        state,
+        pred,
+        latency,
+        req.actual,
+        req.features,
+        model_name,
+        model_version
+    )
 
     return {
         "state": state,
+        "model": model_name,
+        "version": model_version,
         "prediction": pred,
         "latency": latency
     }
@@ -192,6 +243,9 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
         prediction_errors.inc()
         raise HTTPException(status_code=400, detail=str(e))
 
+    model_name = state_cfg.get("model_type", "unknown")
+    model_version = state_cfg.get("version", "v0")
+
     try:
         features = build_features_from_datetime(state, req.datetime)
     except Exception as e:
@@ -203,7 +257,7 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
         y = model.predict(x)
         pred = float(y[0])
 
-        logger.info(f"[PRED DEBUG] state={state} prediction={pred}")
+        logger.info(f"[PRED] state={state} pred={pred}")
 
     except Exception as e:
         prediction_errors.inc()
@@ -211,12 +265,73 @@ def predict_from_datetime(req: PredictFromDatetimeRequest):
 
     latency = time.time() - start
 
-    # 🔥 LOG EVERYTHING
-    log_metrics(state, pred, latency, req.actual, features)
+    log_metrics(
+        state,
+        pred,
+        latency,
+        req.actual,
+        features,
+        model_name,
+        model_version
+    )
 
     return {
         "state": state,
         "datetime": req.datetime.isoformat(),
+        "model": model_name,
+        "version": model_version,
         "prediction": pred,
         "latency": latency
+    }
+
+
+# ================================
+# RETRAIN CONTROL (NEW 🚀)
+# ================================
+@app.post("/approve_retrain")
+def approve_retrain():
+
+    global LAST_RETRAIN_TIME
+
+    logger.warning("🚀 Manual retraining triggered")
+
+    try:
+        evaluate_and_promote()
+
+        LAST_RETRAIN_TIME = datetime.utcnow()
+
+        return {
+            "status": "success",
+            "message": "Retraining started",
+            "time": LAST_RETRAIN_TIME.isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Retraining failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ================================
+# RETRAIN PREVIEW
+# ================================
+@app.get("/retrain-preview")
+def retrain_preview():
+
+    return {
+        "message": "Retraining is NOT automatic",
+        "action_required": "Call /approve_retrain to execute",
+        "note": "Triggered based on monitoring signals"
+    }
+
+
+# ================================
+# RETRAIN STATUS
+# ================================
+@app.get("/retrain-status")
+def retrain_status():
+
+    return {
+        "last_retrain_time": LAST_RETRAIN_TIME.isoformat() if LAST_RETRAIN_TIME else None,
+        "last_signal_time": LAST_SIGNAL_TIME.isoformat() if LAST_SIGNAL_TIME else None,
+        "mode": "manual"
     }

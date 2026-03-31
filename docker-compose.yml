@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
 
   postgres:
@@ -24,7 +26,6 @@ services:
       --default-artifact-root /mlflow/artifacts
       --host 0.0.0.0
       --port 5000
-      --allowed-hosts '*'
     volumes:
       - ./mlruns:/mlflow/artifacts
       - ./mlflow.db:/mlflow.db
@@ -34,10 +35,7 @@ services:
     image: prefecthq/prefect:2.16.7-python3.12
     container_name: prefect_server
     restart: always
-    command: >
-      prefect server start
-      --host 0.0.0.0
-      --port 4200
+    command: prefect server start --host 0.0.0.0 --port 4200
     environment:
       PREFECT_API_DATABASE_CONNECTION_URL: postgresql+asyncpg://prefect:prefect@postgres:5432/prefect
     ports:
@@ -55,7 +53,7 @@ services:
       MLFLOW_TRACKING_URI: http://mlflow:5000
     command: >
       bash -c "
-      sleep 10 &&
+      prefect config set PREFECT_API_URL=http://prefect:4200/api &&
       prefect worker start --pool default-agent-pool --type process
       "
     volumes:
@@ -65,25 +63,28 @@ services:
       - mlflow
 
 
+  # 🔥 FASTAPI SERVICE (FIXED)
   ml_ops_app:
     build: .
     container_name: energy_mlops_container
     restart: always
+    command: >
+      uvicorn src.api.app:app
+      --host 0.0.0.0
+      --port 8000
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-      - "8001:8001"   # ✅ Prometheus metrics
     environment:
       MLFLOW_TRACKING_URI: http://mlflow:5000
       PREFECT_API_URL: http://prefect:4200/api
     depends_on:
       - mlflow
       - prefect
-    stdin_open: true
-    tty: true
 
 
+  # 🔥 STREAMLIT (FIX: API URL)
   streamlit_ui:
     build: .
     container_name: energy_streamlit_ui
@@ -92,6 +93,8 @@ services:
       - .:/app
     ports:
       - "8501:8501"
+    environment:
+      API_URL: http://ml_ops_app:8000
     command: >
       streamlit run ui/app.py
       --server.port=8501
@@ -99,10 +102,6 @@ services:
     depends_on:
       - ml_ops_app
 
-
-  # ---------------------------------------
-  # PROMETHEUS
-  # ---------------------------------------
 
   prometheus:
     image: prom/prometheus
@@ -112,13 +111,21 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
     depends_on:
       - ml_ops_app
+      - alertmanager
 
 
-  # ---------------------------------------
-  # GRAFANA
-  # ---------------------------------------
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    restart: always
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
+
 
   grafana:
     image: grafana/grafana
