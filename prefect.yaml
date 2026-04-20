@@ -4,11 +4,20 @@ deployments:
   work_pool:
     name: default-agent-pool
     work_queue_name: default
+    job_variables: {}
   parameters:
     raw_data_dir: data/raw_data
-  schedule:
-    cron: 0 2 * * *
+  version:
+  tags: []
+  description:
+  schedules:
+  - cron: 0 2 * * *
     timezone: Europe/Istanbul
+    day_or: true
+    active: true
+  pull:
+  - prefect.deployments.steps.set_working_directory:
+      directory: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project
 - name: daily-evaluate-promote
   version:
   tags: []
@@ -21,9 +30,37 @@ deployments:
     job_variables: {}
   schedules:
   - cron: 0 0 * * *
-    timezone:
+    timezone: Europe/Istanbul
     day_or: true
     active: true
   pull:
   - prefect.deployments.steps.set_working_directory:
-      directory: /app
+      directory: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project
+- name: training-deployment
+  version:
+  tags: []
+  description:
+  entrypoint: src/training/evaluate_and_promote_flow.py:evaluate_and_promote
+  parameters: {}
+  work_pool:
+    name: default-agent-pool
+    work_queue_name:
+    job_variables: {}
+  schedules: []
+  pull:
+  - prefect.deployments.steps.set_working_directory:
+      directory: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project
+- name: inference-simulation
+  version:
+  tags: []
+  description:
+  entrypoint: src/inference/inference_flow.py:inference_flow
+  parameters: {}
+  work_pool:
+    name: default-agent-pool
+    work_queue_name:
+    job_variables: {}
+  schedules: []
+  pull:
+  - prefect.deployments.steps.set_working_directory:
+      directory: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project

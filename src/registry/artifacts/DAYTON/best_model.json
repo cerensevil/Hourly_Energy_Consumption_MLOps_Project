@@ -4,7 +4,21 @@
   "mae": 21.12396240234375,
   "rmse": 27.67622488451927,
   "cwe": 42.74493408203125,
-  "data_file": "data/processed/DAYTON_hourly_processed.parquet",
+  "run_id": "acfc87f5f3084cabbdc35d33e7c849b5",
+  "model_name": "energy_model_DAYTON",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-30T18:35:23.433016"
+  "feature_names": [
+    "hour",
+    "dayofweek",
+    "month",
+    "year",
+    "is_weekend",
+    "sin_hour",
+    "cos_hour",
+    "target_lag_1",
+    "target_lag_24",
+    "target_roll_mean_24",
+    "target_roll_std_24"
+  ],
+  "timestamp": "2026-04-19T14:29:25.670299+00:00"
 }

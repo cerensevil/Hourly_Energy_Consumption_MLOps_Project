@@ -4,7 +4,21 @@
   "mae": 354.0022786458333,
   "rmse": 431.90335799437827,
   "cwe": 869.1360677083334,
-  "data_file": "data/processed/PJME_hourly_processed.parquet",
+  "run_id": "5af07fbf3ad14052935ce224e32746b5",
+  "model_name": "energy_model_PJME",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-30T18:41:40.375340"
+  "feature_names": [
+    "hour",
+    "dayofweek",
+    "month",
+    "year",
+    "is_weekend",
+    "sin_hour",
+    "cos_hour",
+    "target_lag_1",
+    "target_lag_24",
+    "target_roll_mean_24",
+    "target_roll_std_24"
+  ],
+  "timestamp": "2026-04-19T14:32:05.713427+00:00"
 }

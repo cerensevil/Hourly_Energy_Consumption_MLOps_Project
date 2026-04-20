@@ -15,3 +15,4 @@ streamlit==1.54.0
 python-dotenv==1.2.1
 requests==2.32.5
 great_expectations
+griffe==0.36.9

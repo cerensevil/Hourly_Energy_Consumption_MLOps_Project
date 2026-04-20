@@ -1,0 +1,43 @@
+###
+### A complete description of a Prefect Deployment for flow 'evaluate-and-promote-multi-state'
+###
+name: training-deployment
+description: null
+version: 37bda59c0e506a51d83c1c26f5067e04
+# The work queue that will handle this deployment's runs
+work_queue_name: default-agent-pool
+work_pool_name: null
+tags: []
+parameters: {}
+schedule: null
+schedules: []
+is_schedule_active: null
+infra_overrides: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  block_type_slug: process
+  _block_type_slug: process
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: evaluate-and-promote-multi-state
+manifest_path: null
+storage: null
+path: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project
+entrypoint: src/training/evaluate_and_promote_flow.py:evaluate_and_promote
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null
+timestamp: '2026-04-13T15:47:26.005420+00:00'
+triggers: []
+enforce_parameter_schema: null

@@ -4,7 +4,21 @@
   "mae": 15.456273396809896,
   "rmse": 19.088862659754152,
   "cwe": 33.19110616048177,
-  "data_file": "data/processed/DUQ_hourly_processed.parquet",
+  "run_id": "20044c1fcd5d4a7090df5b54f3e3e27e",
+  "model_name": "energy_model_DUQ",
   "dataset_version": "energy_features_v1",
-  "timestamp": "2026-03-30T17:47:16.064120"
+  "feature_names": [
+    "hour",
+    "dayofweek",
+    "month",
+    "year",
+    "is_weekend",
+    "sin_hour",
+    "cos_hour",
+    "target_lag_1",
+    "target_lag_24",
+    "target_roll_mean_24",
+    "target_roll_std_24"
+  ],
+  "timestamp": "2026-04-19T14:36:29.491388+00:00"
 }

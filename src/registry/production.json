@@ -1,15 +1,13 @@
 {
   "mlflow": {
-    "tracking_uri": "http://mlflow:5000",
-    "experiment_name": "energy_forecasting",
-    "run_id": null,
-    "model_uri": null
+    "tracking_uri": "http://localhost:5000"
   },
   "states": {
     "FE": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/FE/best_model.pkl",
+      "model_name": "energy_model_FE",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_FE/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -27,8 +25,9 @@
     },
     "EKPC": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/EKPC/best_model.pkl",
+      "model_name": "energy_model_EKPC",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_EKPC/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -46,8 +45,9 @@
     },
     "DEOK": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/DEOK/best_model.pkl",
+      "model_name": "energy_model_DEOK",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_DEOK/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -65,8 +65,9 @@
     },
     "DAYTON": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/DAYTON/best_model.pkl",
+      "model_name": "energy_model_DAYTON",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_DAYTON/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -84,8 +85,9 @@
     },
     "DOM": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/DOM/best_model.pkl",
+      "model_name": "energy_model_DOM",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_DOM/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -103,8 +105,9 @@
     },
     "PJMW": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/PJMW/best_model.pkl",
+      "model_name": "energy_model_PJMW",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_PJMW/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -122,8 +125,9 @@
     },
     "PJME": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/PJME/best_model.pkl",
+      "model_name": "energy_model_PJME",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_PJME/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -141,8 +145,9 @@
     },
     "PJM": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/PJM/best_model.pkl",
+      "model_name": "energy_model_PJM",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_PJM/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -160,8 +165,9 @@
     },
     "AEP": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/AEP/best_model.pkl",
+      "model_name": "energy_model_AEP",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_AEP/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -179,8 +185,9 @@
     },
     "NI": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/NI/best_model.pkl",
+      "model_name": "energy_model_NI",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_NI/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -198,8 +205,9 @@
     },
     "COMED": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/COMED/best_model.pkl",
+      "model_name": "energy_model_COMED",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_COMED/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",
@@ -217,8 +225,9 @@
     },
     "DUQ": {
       "model_type": "xgboost",
-      "loader": "local",
-      "model_path": "src/registry/artifacts/DUQ/best_model.pkl",
+      "model_name": "energy_model_DUQ",
+      "loader": "mlflow",
+      "model_uri": "models:/energy_model_DUQ/Production",
       "dataset_version": "energy_features_v1",
       "feature_names": [
         "hour",

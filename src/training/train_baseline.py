@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.models.baseline_model import BaselineModel
+from src.models.baseline_model import BaselineModel, BaselineSklearnWrapper
 from src.training.evaluate import evaluate_regression
 
 
@@ -34,10 +34,12 @@ def train_baseline(data_path: str, target_col: str):
     # ------------------------------------------------
 
     model = BaselineModel(target_col)
-
     model.fit(train_df)
 
-    preds = model.forecast_next_24(train_df)
+    # 🔥 MLflow uyumlu wrapper
+    wrapped_model = BaselineSklearnWrapper(model, target_col)
+
+    preds = wrapped_model.predict(train_df)
 
     y_test = test_df[target_col].values
 
@@ -48,7 +50,7 @@ def train_baseline(data_path: str, target_col: str):
     metrics = evaluate_regression(y_test, preds)
 
     return {
-        "model": model,
+        "model": wrapped_model,  # 🔥 KRİTİK
         "mae": metrics["mae"],
         "rmse": metrics["rmse"],
         "cwe": metrics["cwe"]

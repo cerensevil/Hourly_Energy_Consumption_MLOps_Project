@@ -1,0 +1,48 @@
+###
+### A complete description of a Prefect Deployment for flow 'inference-simulation-flow'
+###
+name: inference-simulation
+description: null
+version: af04758b218d16e91f4b39095895f85d
+# The work queue that will handle this deployment's runs
+work_queue_name: default-agent-pool
+work_pool_name: default-agent-pool
+tags: []
+parameters: {}
+schedule: null
+schedules: []
+is_schedule_active: null
+infra_overrides: {}
+infrastructure:
+  type: process
+  env: {}
+  labels: {}
+  name: null
+  command: null
+  stream_output: true
+  working_dir: null
+  block_type_slug: process
+  _block_type_slug: process
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: inference-simulation-flow
+manifest_path: null
+storage: null
+path: /home/wit/code/Hourly_Energy_Consumption_MLOps_Project
+entrypoint: src/inference/inference_flow.py:inference_flow
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties:
+    sleep_seconds:
+      default: 0.5
+      position: 0
+      title: sleep_seconds
+      type: number
+  required: null
+  definitions: null
+timestamp: '2026-04-16T16:57:48.429261+00:00'
+triggers: []
+enforce_parameter_schema: null

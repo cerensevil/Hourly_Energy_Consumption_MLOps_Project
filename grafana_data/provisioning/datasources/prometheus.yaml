@@ -1,0 +1,18 @@
+# =============================================
+# DOCKER MODE - Grafana datasource provisioning
+# grafana_data/provisioning/datasources/ klasörüne koy
+# Local modda run_all.sh bu dosyayı localhost:9091 ile oluşturuyor
+# =============================================
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    uid: dfivw5abjdp8gf
+    url: http://prometheus_server:9090
+    access: proxy
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: "5s"

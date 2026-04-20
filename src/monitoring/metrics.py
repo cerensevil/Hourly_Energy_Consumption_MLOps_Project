@@ -28,23 +28,23 @@ prediction_errors = Counter(
 )
 
 # ================================
-# Prediction value distribution
+# Prediction value distribution ✅ FIXED
 # ================================
 prediction_value = Histogram(
     "prediction_value",
     "Distribution of prediction outputs",
     ["state", "model_type", "model_version"],
-    buckets=[50000, 100000, 200000, 400000, 800000, 1200000]
+    buckets=[1000, 5000, 10000, 20000, 50000]
 )
 
 # ================================
-# Absolute error
+# Absolute error ✅ FIXED
 # ================================
 absolute_error = Histogram(
     "prediction_absolute_error",
     "Absolute error |y_true - y_pred|",
     ["state", "model_type", "model_version"],
-    buckets=[1000, 5000, 10000, 20000, 50000, 100000]
+    buckets=[100, 500, 1000, 5000, 10000]
 )
 
 # ================================
@@ -58,12 +58,13 @@ squared_error = Histogram(
 )
 
 # ================================
-# Baseline squared error
+# Baseline squared error ✅ FIXED
 # ================================
 baseline_squared_error = Histogram(
     "baseline_squared_error",
     "Squared error of baseline model (t-24)",
-    ["state"]
+    ["state"],
+    buckets=[1e6, 1e7, 1e8, 1e9]
 )
 
 # ================================

@@ -1,5 +1,6 @@
 # =========================
 # DOCKER MODE
+# make up → tüm servisler + deployment otomatik çalışır
 # =========================
 
 up:
@@ -8,20 +9,18 @@ up:
 down:
 	docker compose down -v
 
-deploy:
-	docker exec -it energy_mlops_container prefect deploy src/training/evaluate_and_promote_flow.py:evaluate_and_promote \
-	  --name daily-evaluate-promote --pool default-agent-pool --cron "0 0 * * *"
-
 test:
 	curl -s http://localhost:4200/api/health
 	curl -s http://localhost:5000
 	curl -s http://localhost:8000/health
 
-all: up deploy test
+all: up test
 
 
 # =========================
-# LOCAL MODE (FIXED 🔥)
+# LOCAL MODE
+# make up-local → servisleri başlat
+# make deploy-local → training bekle → inference başlat
 # =========================
 
 up-local:
@@ -39,6 +38,13 @@ down-local:
 		echo "No PID file found."; \
 	fi
 
+deploy-local:
+	prefect deploy --all
+	@echo "🚀 Running training deployment (waiting for completion)..."
+	prefect deployment run 'evaluate-and-promote-multi-state/training-deployment' --watch
+	@echo "✅ Training done. Starting inference simulation..."
+	prefect deployment run 'inference-simulation-flow/inference-simulation'
+
 
 # =========================
 # QUICK DEV MODE
@@ -53,9 +59,23 @@ dev:
 # =========================
 
 help:
-	@echo "Commands:"
-	@echo "  make up           -> Start with Docker"
-	@echo "  make down         -> Stop Docker"
-	@echo "  make up-local     -> Start locally (no Docker)"
-	@echo "  make down-local   -> Stop local processes"
-	@echo "  make dev          -> Run API in dev mode"
+	@echo ""
+	@echo "========================================="
+	@echo "  DOCKER MODE (önerilen)"
+	@echo "========================================="
+	@echo "  make up            -> Tüm servisleri başlat (otomatik deploy)"
+	@echo "  make down          -> Tüm servisleri durdur"
+	@echo "  make test          -> Servis health check"
+	@echo ""
+	@echo "========================================="
+	@echo "  LOCAL MODE"
+	@echo "========================================="
+	@echo "  make up-local      -> Servisleri başlat"
+	@echo "  make down-local    -> Servisleri durdur"
+	@echo "  make deploy-local  -> Training → Inference"
+	@echo ""
+	@echo "========================================="
+	@echo "  DEV MODE"
+	@echo "========================================="
+	@echo "  make dev           -> Sadece API (hot reload)"
+	@echo ""

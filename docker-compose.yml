@@ -1,7 +1,5 @@
 version: "3.9"
-
 services:
-
   postgres:
     image: postgres:15
     container_name: prefect_postgres
@@ -12,7 +10,6 @@ services:
       POSTGRES_DB: prefect
     volumes:
       - prefect-db:/var/lib/postgresql/data
-
 
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
@@ -30,7 +27,6 @@ services:
       - ./mlruns:/mlflow/artifacts
       - ./mlflow.db:/mlflow.db
 
-
   prefect:
     image: prefecthq/prefect:2.16.7-python3.12
     container_name: prefect_server
@@ -43,7 +39,6 @@ services:
     depends_on:
       - postgres
 
-
   prefect-worker:
     build: .
     container_name: prefect_worker
@@ -53,8 +48,13 @@ services:
       MLFLOW_TRACKING_URI: http://mlflow:5000
     command: >
       bash -c "
-      prefect config set PREFECT_API_URL=http://prefect:4200/api &&
-      prefect worker start --pool default-agent-pool --type process
+        prefect config set PREFECT_API_URL=http://prefect:4200/api &&
+        sleep 10 &&
+        prefect work-pool create default-agent-pool --type process 2>/dev/null || true &&
+        prefect deploy --all &&
+        prefect deployment run 'evaluate-and-promote-multi-state/training-deployment' --watch &&
+        prefect deployment run 'inference-simulation-flow/inference-simulation' &
+        prefect worker start --pool default-agent-pool --type process
       "
     volumes:
       - .:/app
@@ -62,8 +62,6 @@ services:
       - prefect
       - mlflow
 
-
-  # 🔥 FASTAPI SERVICE (FIXED)
   ml_ops_app:
     build: .
     container_name: energy_mlops_container
@@ -83,8 +81,6 @@ services:
       - mlflow
       - prefect
 
-
-  # 🔥 STREAMLIT (FIX: API URL)
   streamlit_ui:
     build: .
     container_name: energy_streamlit_ui
@@ -102,21 +98,6 @@ services:
     depends_on:
       - ml_ops_app
 
-
-  prometheus:
-    image: prom/prometheus
-    container_name: prometheus_server
-    restart: always
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
-    depends_on:
-      - ml_ops_app
-      - alertmanager
-
-
   alertmanager:
     image: prom/alertmanager
     container_name: alertmanager
@@ -126,6 +107,18 @@ services:
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus_server
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.docker.yml:/etc/prometheus/prometheus.yml
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml
+    depends_on:
+      - ml_ops_app
+      - alertmanager
 
   grafana:
     image: grafana/grafana
@@ -135,9 +128,12 @@ services:
       - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./grafana_data/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     depends_on:
       - prometheus
-
 
 volumes:
   prefect-db:
