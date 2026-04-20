@@ -100,4 +100,4 @@ grafana_data/*.db
 grafana_data/csv/
 grafana_data/pdf/
 grafana_data/png/
-grafana_data/unified-search/
+grafana_data/unified-search/*.zip
