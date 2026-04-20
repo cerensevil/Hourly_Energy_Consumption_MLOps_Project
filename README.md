@@ -151,13 +151,50 @@ Streamlit dashboard simulates 2018 as live production data:
 
 ## Development
 
+### Local mode
+
 ```bash
-# API only (hot reload)
-make dev
+# Tüm servisleri başlat
+make up-local
 
-# Health check
-make test
+# Data prep → training → inference (sırayla)
+make deploy-local
 
-# Stop local services
+# Servisleri durdur
 make down-local
+```
+
+### Docker mode
+
+```bash
+# Build ve başlat (deployment otomatik çalışır)
+make up
+
+# Durdur
+make down
+```
+
+### API only (hot reload)
+
+```bash
+make dev
+```
+
+### Health check
+
+```bash
+make test
+```
+
+### Servis sırası (local)
+
+```
+MLflow → FastAPI → Prometheus → Grafana → Prefect → Worker → Streamlit
+         ↓
+    deploy-local:
+    energy-data-prep --watch
+         ↓
+    training-deployment --watch
+         ↓
+    inference-simulation
 ```
