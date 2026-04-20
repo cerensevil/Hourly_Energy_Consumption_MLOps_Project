@@ -154,23 +154,23 @@ Streamlit dashboard simulates 2018 as live production data:
 ### Local mode
 
 ```bash
-# Tüm servisleri başlat
+# Start all servives
 make up-local
 
-# Data prep → training → inference (sırayla)
+# Data prep → training → inference (sequential)
 make deploy-local
 
-# Servisleri durdur
+# Stop services
 make down-local
 ```
 
 ### Docker mode
 
 ```bash
-# Build ve başlat (deployment otomatik çalışır)
+# Build and start (deployment starts automatically)
 make up
 
-# Durdur
+# Stop
 make down
 ```
 
@@ -186,7 +186,7 @@ make dev
 make test
 ```
 
-### Servis sırası (local)
+### Service order (local)
 
 ```
 MLflow → FastAPI → Prometheus → Grafana → Prefect → Worker → Streamlit
