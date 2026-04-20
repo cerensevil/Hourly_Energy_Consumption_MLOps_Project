@@ -101,3 +101,5 @@ grafana_data/csv/
 grafana_data/pdf/
 grafana_data/png/
 grafana_data/unified-search/*.zip
+grafana_plugins/
+src/registry/leaderboards/
