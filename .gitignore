@@ -50,8 +50,6 @@ src/registry/artifacts/
 # Reports
 # ------------------------------------------------
 reports/
-*.html
-*.json
 
 # ------------------------------------------------
 # Logs
@@ -88,5 +86,18 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# ------------------------------------------------
 # Prometheus data
+# ------------------------------------------------
 prometheus_data/
+
+# ------------------------------------------------
+# Grafana data (db, cache, geçici dosyalar)
+# Provisioning klasörü hariç tutulur (önemli config)
+# ------------------------------------------------
+grafana_data/*.db
+grafana_data/csv/
+grafana_data/pdf/
+grafana_data/png/
+grafana_data/unified-search/
